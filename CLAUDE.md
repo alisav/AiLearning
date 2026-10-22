@@ -13,7 +13,7 @@
   - `/api` istekleri geliştirmede Vite proxy ile `http://localhost:5139` adresine gider (`vite.config.ts`)
   - `src/todoApi.ts`: API istemcisi; `src/TodoList.tsx`: To-Do arayüzü
 - `tests/AiLearning.Api.Tests/`: xUnit API entegrasyon testleri (`WebApplicationFactory`, test başına geçici SQLite dosyası)
-- `.github/workflows/ci.yml`: PR ve `main` push'larında backend build + test (`backend` job'ı)
+- `.github/workflows/ci.yml`: PR ve `main` push'larında `backend` (restore, build, test) ve `frontend` (`npm ci`, lint, build; Node 22) job'ları
 - `AiLearning.slnx`: .NET solution
 
 ## Komutlar

@@ -87,4 +87,16 @@ dotnet test AiLearning.slnx --artifacts-path ../ailearning-artifacts
 
 ## CI
 
-`.github/workflows/ci.yml`, Pull Request açıldığında veya güncellendiğinde ve `main`'e push yapıldığında backend'i derler ve testleri çalıştırır (`backend` job'ı).
+`.github/workflows/ci.yml` Pull Request açıldığında veya güncellendiğinde ve `main`'e push yapıldığında iki job çalıştırır:
+
+- `backend`: `dotnet restore`, `dotnet build` (Release), `dotnet test`
+- `frontend` (Node 22, `src/AiLearning.Web`): `npm ci`, `npm run lint`, `npm run build`
+
+Frontend kontrollerini yerelde çalıştırmak için:
+
+```bash
+cd src/AiLearning.Web
+npm ci
+npm run lint
+npm run build
+```
