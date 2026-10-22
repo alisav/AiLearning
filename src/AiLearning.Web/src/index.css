@@ -1,0 +1,23 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+main {
+  max-width: 640px;
+  margin: 4rem auto;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.checking {
+  color: #888;
+}
+
+.connected {
+  color: #16a34a;
+}
+
+.error {
+  color: #dc2626;
+}
