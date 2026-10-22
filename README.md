@@ -1,6 +1,6 @@
 # AiLearning
 
-.NET 10 Web API + React (TypeScript, Vite) full-stack proje.
+.NET 10 Web API + EF Core SQLite + React (TypeScript, Vite) full-stack proje.
 
 ## Yapı
 
@@ -49,7 +49,14 @@ Tarayıcıda http://localhost:5173 adresini açın. Geliştirme ortamında `/api
 | PUT | `/api/todos/{id}` | Görevi günceller (`{"title":"...","isCompleted":true}`) |
 | DELETE | `/api/todos/{id}` | Görevi siler |
 
-Görevler bellekte tutulur; API yeniden başlatıldığında silinir.
+## Veritabanı
+
+Görevler EF Core ile SQLite veritabanında kalıcı olarak tutulur.
+
+- Dosya: `src/AiLearning.Api/ailearning.db` (Git'e eklenmez)
+- Bağlantı ayarı: `appsettings.json` → `ConnectionStrings:Todos`
+- Geliştirme ortamında (`ASPNETCORE_ENVIRONMENT=Development`) API ilk açılışta veritabanını otomatik oluşturur.
+- Veritabanını sıfırlamak için API'yi durdurup `ailearning.db` dosyasını silmeniz yeterlidir.
 
 ## Derleme
 

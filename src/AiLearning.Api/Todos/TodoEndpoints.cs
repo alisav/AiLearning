@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace AiLearning.Api.Todos;
 
 public record CreateTodoRequest(string? Title);
@@ -6,30 +8,37 @@ public record UpdateTodoRequest(string? Title, bool IsCompleted);
 
 public static class TodoEndpoints
 {
-    private const int MaxTitleLength = 200;
-
     public static void MapTodoEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/todos");
 
-        group.MapGet("/", (TodoStore store) => store.GetAll());
+        group.MapGet("/", async (TodoDbContext db) =>
+            await db.Todos.AsNoTracking().OrderBy(t => t.Id).ToListAsync());
 
-        group.MapPost("/", (CreateTodoRequest request, TodoStore store) =>
+        group.MapPost("/", async (CreateTodoRequest request, TodoDbContext db) =>
         {
             if (ValidateTitle(request.Title) is { } error) return error;
-            var item = store.Add(request.Title!.Trim());
+            var item = new TodoItem { Title = request.Title!.Trim() };
+            db.Todos.Add(item);
+            await db.SaveChangesAsync();
             return Results.Created($"/api/todos/{item.Id}", item);
         });
 
-        group.MapPut("/{id:int}", (int id, UpdateTodoRequest request, TodoStore store) =>
+        group.MapPut("/{id:int}", async (int id, UpdateTodoRequest request, TodoDbContext db) =>
         {
             if (ValidateTitle(request.Title) is { } error) return error;
-            var item = store.Update(id, request.Title!.Trim(), request.IsCompleted);
-            return item is null ? Results.NotFound() : Results.Ok(item);
+            var item = await db.Todos.FindAsync(id);
+            if (item is null) return Results.NotFound();
+            item.Title = request.Title!.Trim();
+            item.IsCompleted = request.IsCompleted;
+            await db.SaveChangesAsync();
+            return Results.Ok(item);
         });
 
-        group.MapDelete("/{id:int}", (int id, TodoStore store) =>
-            store.Delete(id) ? Results.NoContent() : Results.NotFound());
+        group.MapDelete("/{id:int}", async (int id, TodoDbContext db) =>
+            await db.Todos.Where(t => t.Id == id).ExecuteDeleteAsync() > 0
+                ? Results.NoContent()
+                : Results.NotFound());
     }
 
     private static IResult? ValidateTitle(string? title)
@@ -40,10 +49,10 @@ public static class TodoEndpoints
                 ["title"] = ["Başlık boş olamaz."]
             });
 
-        if (title.Trim().Length > MaxTitleLength)
+        if (title.Trim().Length > TodoItem.MaxTitleLength)
             return Results.ValidationProblem(new Dictionary<string, string[]>
             {
-                ["title"] = [$"Başlık en fazla {MaxTitleLength} karakter olabilir."]
+                ["title"] = [$"Başlık en fazla {TodoItem.MaxTitleLength} karakter olabilir."]
             });
 
         return null;
