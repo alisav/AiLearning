@@ -64,3 +64,27 @@ Görevler EF Core ile SQLite veritabanında kalıcı olarak tutulur.
 dotnet build AiLearning.slnx
 cd src/AiLearning.Web && npm run build
 ```
+
+## Testler
+
+Backend entegrasyon testleri `tests/AiLearning.Api.Tests` altındadır (xUnit + `WebApplicationFactory`). Testler API'yi bellekte çalıştırır ve her test için sistemin geçici dizininde ayrı bir SQLite dosyası kullanır; `src/AiLearning.Api/ailearning.db` geliştirme veritabanına dokunmaz. Test bitince geçici dosya silinir.
+
+```bash
+dotnet test AiLearning.slnx
+```
+
+Tek bir testi çalıştırmak için:
+
+```bash
+dotnet test AiLearning.slnx --filter "FullyQualifiedName~Todos_PersistAcrossApplicationRestart"
+```
+
+API `dotnet run` ile açıksa `bin/` altındaki dosyalar kilitli olabilir. Bu durumda API'yi durdurun ya da çıktıyı başka bir dizine alın:
+
+```bash
+dotnet test AiLearning.slnx --artifacts-path ../ailearning-artifacts
+```
+
+## CI
+
+`.github/workflows/ci.yml`, Pull Request açıldığında veya güncellendiğinde ve `main`'e push yapıldığında backend'i derler ve testleri çalıştırır (`backend` job'ı).
