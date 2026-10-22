@@ -13,7 +13,7 @@
   - `/api` istekleri geliştirmede Vite proxy ile `http://localhost:5139` adresine gider (`vite.config.ts`)
   - `src/todoApi.ts`: API istemcisi; `src/TodoList.tsx`: To-Do arayüzü
 - `tests/AiLearning.Api.Tests/`: xUnit API entegrasyon testleri (`WebApplicationFactory`, test başına geçici SQLite dosyası)
-- `.github/workflows/ci.yml`: PR ve `main` push'larında `backend` (restore, build, test) ve `frontend` (`npm ci`, lint, build; Node 22) job'ları
+- `.github/workflows/ci.yml`: PR ve `main` push'larında `backend` (restore, build, test) ve `frontend` (`npm ci`, lint, test, build; Node 22) job'ları
 - `AiLearning.slnx`: .NET solution
 
 ## Komutlar
@@ -31,6 +31,7 @@ Frontend (`src/AiLearning.Web` içinden):
 npm install
 npm run build   # tsc -b && vite build
 npm run lint    # oxlint
+npm test        # vitest run
 npm run dev
 ```
 
@@ -42,6 +43,8 @@ dotnet test AiLearning.slnx
 
 Testler `tests/AiLearning.Api.Tests` altındadır ve endpoint'leri, doğrulamaları, durum kodlarını ve yeniden başlatma sonrası SQLite kalıcılığını kapsar. `TodoApiFactory` her test için ayrı bir geçici SQLite dosyası kullanır; geliştirme veritabanına dokunan test yazma. Yeni endpoint veya davranış eklerken buraya entegrasyon testi ekle.
 
+Frontend testleri Vitest + React Testing Library (jsdom) ile `src/AiLearning.Web/src/*.test.tsx` dosyalarındadır. API çağrıları `src/test/fakeApi.ts` içindeki `installFakeApi` ile sahte `fetch` üzerinden karşılanır; testlerde gerçek API'ye istek atma. Yeni arayüz davranışı eklerken buraya test ekle.
+
 ## Çalışma kuralları
 
 1. **`main` her zaman çalışan ve doğrulanmış sürümdür.** `main` üzerinde doğrudan kod değişikliği, commit veya push yapma.
@@ -51,7 +54,7 @@ Testler `tests/AiLearning.Api.Tests` altındadır ve endpoint'leri, doğrulamala
 5. **Kullanıcının çalışmasını koru.** Commit'lenmemiş değişiklikleri, commit'leri veya Git geçmişini izin almadan silme ya da yeniden yazma. Buna `reset --hard`, `push --force`, rebase/amend ile yayımlanmış geçmişi değiştirmek ve kullanıcının çalışan süreçlerini sonlandırmak dahildir.
 6. **Her değişiklikten sonra ilgili kontrolleri çalıştır.**
    - Backend değiştiyse: `dotnet build AiLearning.slnx` (0 hata) ve `dotnet test AiLearning.slnx` (tümü geçmeli).
-   - Frontend değiştiyse: `npm run build` ve `npm run lint`.
+   - Frontend değiştiyse: `npm run lint`, `npm test` ve `npm run build`.
    - Uçtan uca etkisi olan değişikliklerde (ör. endpoint veya proxy değişiklikleri) API ve Vite'ı birlikte çalıştırıp `http://localhost:5173/api/...` üzerinden test et.
 7. **Sürümleri gereksiz yere yükseltme.** Mevcut sürümler: .NET 10 (`net10.0`), EF Core SQLite 10.0.x, React 19, TypeScript ~6.0, Vite 8. Gereksiz NuGet/npm paketi veya mimari katman ekleme.
 8. **Gereksiz onay isteme.** Dosya düzenleme, build/test, branch oluşturma, branch'e commit ve push gibi rutin, geri alınabilir işlemleri kendin tamamla. Şu durumlarda önce sor:

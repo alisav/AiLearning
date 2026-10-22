@@ -85,12 +85,22 @@ API `dotnet run` ile açıksa `bin/` altındaki dosyalar kilitli olabilir. Bu du
 dotnet test AiLearning.slnx --artifacts-path ../ailearning-artifacts
 ```
 
+### Frontend testleri
+
+Frontend testleri Vitest + React Testing Library ile jsdom ortamında çalışır (`src/AiLearning.Web/src/*.test.tsx`). API istekleri `src/test/fakeApi.ts` içindeki bellek içi sahte API ile karşılanır; testler gerçek backend'e veya veritabanına bağlanmaz.
+
+```bash
+cd src/AiLearning.Web
+npm test             # tek seferlik çalıştırma
+npx vitest           # izleme modu
+```
+
 ## CI
 
 `.github/workflows/ci.yml` Pull Request açıldığında veya güncellendiğinde ve `main`'e push yapıldığında iki job çalıştırır:
 
 - `backend`: `dotnet restore`, `dotnet build` (Release), `dotnet test`
-- `frontend` (Node 22, `src/AiLearning.Web`): `npm ci`, `npm run lint`, `npm run build`
+- `frontend` (Node 22, `src/AiLearning.Web`): `npm ci`, `npm run lint`, `npm test`, `npm run build`
 
 Frontend kontrollerini yerelde çalıştırmak için:
 
@@ -98,5 +108,6 @@ Frontend kontrollerini yerelde çalıştırmak için:
 cd src/AiLearning.Web
 npm ci
 npm run lint
+npm test
 npm run build
 ```
