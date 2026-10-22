@@ -7,6 +7,10 @@ main {
   max-width: 640px;
   margin: 4rem auto;
   padding: 0 1rem;
+}
+
+main > h1,
+main > p {
   text-align: center;
 }
 
@@ -20,4 +24,43 @@ main {
 
 .error {
   color: #dc2626;
+}
+
+.todos {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.todos form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.todos form input {
+  flex: 1;
+  padding: 0.5rem;
+}
+
+.todos ul {
+  list-style: none;
+  padding: 0;
+}
+
+.todos li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.todos label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.todos .done {
+  text-decoration: line-through;
+  color: #888;
 }

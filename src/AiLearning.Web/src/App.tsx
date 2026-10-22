@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import TodoList from './TodoList'
 
 type ApiStatus = 'checking' | 'connected' | 'error'
 
@@ -26,6 +27,7 @@ function App() {
       <p>
         API durumu: <strong className={status}>{statusText[status]}</strong>
       </p>
+      <TodoList />
     </main>
   )
 }

@@ -4,3 +4,31 @@ GET {{AiLearning.Api_HostAddress}}/api/health
 Accept: application/json
 
 ###
+
+GET {{AiLearning.Api_HostAddress}}/api/todos
+Accept: application/json
+
+###
+
+POST {{AiLearning.Api_HostAddress}}/api/todos
+Content-Type: application/json
+
+{
+  "title": "İlk görev"
+}
+
+###
+
+PUT {{AiLearning.Api_HostAddress}}/api/todos/1
+Content-Type: application/json
+
+{
+  "title": "İlk görev",
+  "isCompleted": true
+}
+
+###
+
+DELETE {{AiLearning.Api_HostAddress}}/api/todos/1
+
+###

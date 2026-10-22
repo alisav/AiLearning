@@ -39,6 +39,18 @@ npm run dev
 
 Tarayıcıda http://localhost:5173 adresini açın. Geliştirme ortamında `/api` istekleri Vite proxy ile backend'e (`http://localhost:5139`) yönlendirilir.
 
+## API
+
+| Metot | Yol | Açıklama |
+|---|---|---|
+| GET | `/api/health` | Sağlık kontrolü |
+| GET | `/api/todos` | Görevleri listeler |
+| POST | `/api/todos` | Görev ekler (`{"title":"..."}`) |
+| PUT | `/api/todos/{id}` | Görevi günceller (`{"title":"...","isCompleted":true}`) |
+| DELETE | `/api/todos/{id}` | Görevi siler |
+
+Görevler bellekte tutulur; API yeniden başlatıldığında silinir.
+
 ## Derleme
 
 ```bash
