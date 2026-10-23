@@ -170,6 +170,45 @@ public sealed class TodoEndpointsTests : IDisposable
         Assert.Equal([created with { IsCompleted = true }], await GetAll());
     }
 
+    [Fact]
+    public async Task Update_TogglesCompletionBothWays_KeepingTitle()
+    {
+        var created = await Create("Kod yaz");
+
+        var completed = await SetCompleted(created, true);
+        Assert.Equal(created with { IsCompleted = true }, completed);
+        Assert.Equal([completed], await GetAll());
+
+        var reopened = await SetCompleted(created, false);
+        Assert.Equal(created with { IsCompleted = false }, reopened);
+        Assert.Equal([reopened], await GetAll());
+    }
+
+    [Fact]
+    public async Task CompletionState_PersistsAcrossApplicationRestart()
+    {
+        var completed = await Create("Tamamlanan");
+        var reopened = await Create("Yeniden açılan");
+        var untouched = await Create("Dokunulmayan");
+        await SetCompleted(completed, true);
+        await SetCompleted(reopened, true);
+        await SetCompleted(reopened, false);
+
+        await RestartApplication();
+
+        Assert.Equal(
+            [completed with { IsCompleted = true }, reopened with { IsCompleted = false }, untouched],
+            await GetAll());
+    }
+
+    private async Task<TodoDto> SetCompleted(TodoDto todo, bool isCompleted)
+    {
+        var response = await _client.PutAsJsonAsync(
+            $"/api/todos/{todo.Id}", new { title = todo.Title, isCompleted });
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        return (await response.Content.ReadFromJsonAsync<TodoDto>())!;
+    }
+
     private async Task RestartApplication()
     {
         _client.Dispose();

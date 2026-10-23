@@ -6,6 +6,9 @@ function TodoList() {
   const [title, setTitle] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Ids with a completion update in flight; their checkboxes stay disabled so
+  // a quick second click can't send an update based on stale state.
+  const [togglingIds, setTogglingIds] = useState<number[]>([])
 
   useEffect(() => {
     todoApi
@@ -30,12 +33,15 @@ function TodoList() {
   }
 
   async function handleToggle(todo: Todo) {
+    setTogglingIds((prev) => [...prev, todo.id])
     try {
       const updated = await todoApi.update({ ...todo, isCompleted: !todo.isCompleted })
       setTodos((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
       setError(null)
     } catch {
       setError('Görev güncellenemedi.')
+    } finally {
+      setTogglingIds((prev) => prev.filter((id) => id !== todo.id))
     }
   }
 
@@ -77,6 +83,7 @@ function TodoList() {
                 <input
                   type="checkbox"
                   checked={todo.isCompleted}
+                  disabled={togglingIds.includes(todo.id)}
                   onChange={() => handleToggle(todo)}
                 />
                 {todo.title}

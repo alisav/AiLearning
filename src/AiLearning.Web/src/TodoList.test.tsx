@@ -101,4 +101,79 @@ describe('TodoList', () => {
     expect(await screen.findByText('Görev silinemedi.')).toBeTruthy()
     expect(screen.getByText('Süt al')).toBeTruthy()
   })
+
+  it('marks a todo as completed and back as not completed', async () => {
+    const user = userEvent.setup()
+    const { fetchMock, todos } = installFakeApi([{ id: 1, title: 'Süt al', isCompleted: false }])
+    render(<TodoList />)
+    await screen.findByText('Süt al')
+    const checkbox = () => within(rowOf('Süt al')).getByRole<HTMLInputElement>('checkbox')
+
+    await user.click(checkbox())
+
+    await vi.waitFor(() => expect(checkbox().checked).toBe(true))
+    expect(rowOf('Süt al').querySelector('label')!.className).toBe('done')
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/api/todos/1',
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({ title: 'Süt al', isCompleted: true }),
+      }),
+    )
+    expect(todos).toEqual([{ id: 1, title: 'Süt al', isCompleted: true }])
+
+    await vi.waitFor(() => expect(checkbox().disabled).toBe(false))
+    await user.click(checkbox())
+
+    await vi.waitFor(() => expect(checkbox().checked).toBe(false))
+    expect(rowOf('Süt al').querySelector('label')!.className).toBe('')
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/api/todos/1',
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({ title: 'Süt al', isCompleted: false }),
+      }),
+    )
+    expect(todos).toEqual([{ id: 1, title: 'Süt al', isCompleted: false }])
+  })
+
+  it('keeps the previous state and shows an error when the update fails', async () => {
+    const user = userEvent.setup()
+    const { fetchMock } = installFakeApi([{ id: 1, title: 'Süt al', isCompleted: false }])
+    render(<TodoList />)
+    await screen.findByText('Süt al')
+    fetchMock.mockImplementationOnce(async () => new Response(null, { status: 500 }))
+
+    await user.click(within(rowOf('Süt al')).getByRole('checkbox'))
+
+    expect(await screen.findByText('Görev güncellenemedi.')).toBeTruthy()
+    const checkbox = within(rowOf('Süt al')).getByRole<HTMLInputElement>('checkbox')
+    expect(checkbox.checked).toBe(false)
+    expect(checkbox.disabled).toBe(false)
+  })
+
+  it('disables the checkbox while the update is in flight', async () => {
+    const user = userEvent.setup()
+    const { fetchMock } = installFakeApi([
+      { id: 1, title: 'Süt al', isCompleted: false },
+      { id: 2, title: 'Kod yaz', isCompleted: false },
+    ])
+    render(<TodoList />)
+    await screen.findByText('Süt al')
+    let respond!: (response: Response) => void
+    fetchMock.mockImplementationOnce(() => new Promise<Response>((resolve) => (respond = resolve)))
+    const checkbox = () => within(rowOf('Süt al')).getByRole<HTMLInputElement>('checkbox')
+
+    await user.click(checkbox())
+
+    expect(checkbox().disabled).toBe(true)
+    expect(within(rowOf('Kod yaz')).getByRole<HTMLInputElement>('checkbox').disabled).toBe(false)
+    await user.click(checkbox())
+    expect(fetchMock).toHaveBeenCalledTimes(2) // initial GET + a single PUT
+
+    respond(Response.json({ id: 1, title: 'Süt al', isCompleted: true }))
+
+    await vi.waitFor(() => expect(checkbox().disabled).toBe(false))
+    expect(checkbox().checked).toBe(true)
+  })
 })
